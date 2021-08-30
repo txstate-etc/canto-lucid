@@ -8,6 +8,7 @@
     "start": "node src/index.js"
   },
   "dependencies": {
+    "agentkeepalive": "^4.1.4",
     "axios": "^0.21.1",
     "fastify-txstate": "^2.3.0",
     "txstate-utils": "^1.4.6"

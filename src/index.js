@@ -1,3 +1,4 @@
+import { HttpsAgent } from 'agentkeepalive'
 import axios from 'axios'
 import Server from 'fastify-txstate'
 import { Cache } from 'txstate-utils'
@@ -27,6 +28,7 @@ const tokenCache = new Cache(async () => {
 async function client () {
   return axios.create({
     baseURL: 'https://txstate.canto.com/api/v1',
+    httpsAgent: new HttpsAgent(),
     headers: {
       authorization: `Bearer ${await tokenCache.get()}`
     }
@@ -38,8 +40,8 @@ async function getPage (page = 1) {
     params: {
       approval: 'approved',
       scheme: 'image',
-      limit: 1000,
-      start: (page - 1) * 1000
+      limit: 10000,
+      start: (page - 1) * 10000
     }
   })
   const found = resp.data.found
@@ -50,8 +52,8 @@ async function getPage (page = 1) {
 
 server.app.get('/', async (req, res) => {
   const lucid = new LucidData()
-  let lastPage = 0
-  for (let page = 1; page < 5 && lastPage !== page; page++) {
+  let lastPage = 100
+  for (let page = 1; page < 100 && page <= lastPage; page++) {
     let images;
     ({ images, lastPage } = await getPage(page))
     for (const image of images) {

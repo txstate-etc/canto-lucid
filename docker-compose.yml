@@ -3,6 +3,9 @@ services:
   cantobridge:
     build:
       context: .
+    environment:
+      CANTO_APP_ID: set in docker-compose.override.yml
+      CANTO_APP_SECRET: set in docker-compose.override.yml
     ports:
       - 127.0.0.1:80:80
       - 127.0.0.1:9229:9229
