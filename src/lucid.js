@@ -1,3 +1,5 @@
+import { isNotNull } from 'txstate-utils'
+
 export class LucidData {
   constructor () {
     this.version = 1
@@ -49,7 +51,10 @@ export class LucidImage {
     this.name = img.name
     this.url = img.url.directUrlOriginal
     this.thumbnailUrl = img.url.preview
-    this.tags = (img.tag ?? []).concat(img.keyword ?? []).filter(t => t !== 'Untagged')
+    this.tags = (img.tag ?? [])
+      .concat(img.keyword ?? [])
+      .concat(Object.values(img.additional).filter(isNotNull))
+      .filter(t => t !== 'Untagged')
     this.folders = img.relatedAlbums?.map(album => {
       const ids = album.idPath.split('/')
       const names = album.namePath.split('/')
