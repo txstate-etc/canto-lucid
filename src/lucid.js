@@ -51,10 +51,18 @@ export class LucidImage {
     this.name = img.name
     this.url = img.url.directUrlOriginal
     this.thumbnailUrl = img.url.preview
+    const seen = new Set()
     this.tags = (img.tag ?? [])
       .concat(img.keyword ?? [])
       .concat(Object.values(img.additional).filter(isNotNull))
+      .map(t => t.trim())
       .filter(t => t !== 'Untagged')
+      .filter(t => {
+        const lc = t.toLocaleLowerCase()
+        const dupe = seen.has(lc)
+        seen.add(lc)
+        return !dupe
+      })
     this.folders = img.relatedAlbums?.map(album => {
       const ids = album.idPath.split('/')
       const names = album.namePath.split('/')
