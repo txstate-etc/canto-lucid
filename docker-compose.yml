@@ -4,6 +4,7 @@ services:
     build:
       context: .
     environment:
+      CANTO_DOMAIN: YourCantoName
       CANTO_APP_ID: set in docker-compose.override.yml
       CANTO_APP_SECRET: set in docker-compose.override.yml
       BASIC_AUTH_USER: admin

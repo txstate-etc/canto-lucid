@@ -26,7 +26,7 @@ const tokenCache = new Cache(async () => {
 })
 
 const savedClient = axios.create({
-  baseURL: 'https://txstate.canto.com/api/v1',
+  baseURL: `https://${process.env.CANTO_DOMAIN}.canto.com/api/v1`,
   httpsAgent: new HttpsAgent()
 })
 async function client () {

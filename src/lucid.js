@@ -58,7 +58,7 @@ export class LucidImage {
     this.folders = img.relatedAlbums?.map(album => {
       const ids = album.idPath.split('/')
       const names = album.namePath.split('/')
-      if (ids.length !== names.length) console.log('Found an album with a / in its name.')
+      if (ids.length !== names.length) console.error('Found an album with a / in its name.')
       return ids.map((id, i) => ({ id, name: names[i] }))
     }) ?? []
   }
