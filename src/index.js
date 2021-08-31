@@ -39,7 +39,7 @@ async function getPage (page = 1) {
     params: {
       approval: 'approved',
       scheme: 'image',
-      limit: 1000,
+      limit: 10000,
       start: (page - 1) * 10000
     }
   })
@@ -64,7 +64,7 @@ server.app.get('/', async (req, res) => {
   }
   const lucid = new LucidData()
   let lastPage = 25
-  for (let page = 1; page <= 1 && page <= lastPage; page++) {
+  for (let page = 1; page <= 25 && page <= lastPage; page++) {
     let images;
     ({ images, lastPage } = await getPage(page))
     for (const image of images) {
