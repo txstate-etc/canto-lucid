@@ -25,14 +25,13 @@ const tokenCache = new Cache(async () => {
   freshseconds: 15 * 24 * 3600
 })
 
+const savedClient = axios.create({
+  baseURL: 'https://txstate.canto.com/api/v1',
+  httpsAgent: new HttpsAgent()
+})
 async function client () {
-  return axios.create({
-    baseURL: 'https://txstate.canto.com/api/v1',
-    httpsAgent: new HttpsAgent(),
-    headers: {
-      authorization: `Bearer ${await tokenCache.get()}`
-    }
-  })
+  savedClient.defaults.headers.authorization = `Bearer ${await tokenCache.get()}`
+  return savedClient
 }
 
 async function getPage (page = 1) {
@@ -50,7 +49,21 @@ async function getPage (page = 1) {
   return { images, lastPage: Math.ceil(found / limit) }
 }
 
+const basicAuthSecret = 'Basic ' + Buffer.from(`${process.env.BASIC_AUTH_USER}:${process.env.BASIC_AUTH_SECRET}`).toString('base64')
 server.app.get('/', async (req, res) => {
+  if (process.env.BASIC_AUTH_USER) {
+    if (!req.headers.authorization) {
+      res.headers({
+        'WWW-Authenticate': 'Basic realm="cantobridge integration data", charset="UTF-8"'
+      }).status(401).send()
+      return
+    } else {
+      if (req.headers.authorization !== basicAuthSecret) {
+        res.status(401).send()
+        return
+      }
+    }
+  }
   const lucid = new LucidData()
   let lastPage = 100
   for (let page = 1; page < 100 && page <= lastPage; page++) {
