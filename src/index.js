@@ -57,16 +57,14 @@ server.app.get('/', async (req, res) => {
         'WWW-Authenticate': 'Basic realm="cantobridge integration data", charset="UTF-8"'
       }).status(401).send()
       return
-    } else {
-      if (req.headers.authorization !== basicAuthSecret) {
-        res.status(401).send()
-        return
-      }
+    } else if (req.headers.authorization !== basicAuthSecret) {
+      res.status(401).send()
+      return
     }
   }
   const lucid = new LucidData()
-  let lastPage = 100
-  for (let page = 1; page < 100 && page <= lastPage; page++) {
+  let lastPage = 25
+  for (let page = 1; page <= 25 && page <= lastPage; page++) {
     let images;
     ({ images, lastPage } = await getPage(page))
     for (const image of images) {
@@ -76,5 +74,5 @@ server.app.get('/', async (req, res) => {
   return lucid.json()
 })
 
-server.start()
+server.start(3000)
   .catch(e => { console.error(e); process.exit(1) })
