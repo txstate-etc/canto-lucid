@@ -15,7 +15,8 @@ As a best practice, the node instance runs as non-root and so the server runs on
 ## SSL
 SSL support is enabled automatically if you mount a key and cert into the docker container at `/securekeys/private.key` and `/securekeys/cert.pem`, respectively. If you provide certs, port 3000 will expect https connections only.
 
-See the docker docs for more information about mounting volumes.
+See the docker docs for more information about mounting volumes. Make sure the node user
+(UID: 1000, GID: 1000) is permitted to read both files.
 
 ## Image Scaling
 Canto's image scaling offerings are limited in that you cannot set the desired JPG quality. Lucid has its own scaling mechanisms that will kick in for images larger than 4000x4000 pixels (according to their integration specialist), and should be sufficient. However, if you would like to control the scaling and have Canto process your images, you can enable this with environment variables:
@@ -24,7 +25,7 @@ Canto's image scaling offerings are limited in that you cannot set the desired J
 * `LUCID_MAXRES` Trigger the processing for images with either width or height greater than this many pixels. Default 4000.
 
 ## To run a developer instance
-Create a `docker-compose.override.yml` file and add the CANTO_ prefixed environment variables to it. Then run `docker compose up --build`. This will start the server. Visit http://localhost in your browser to see the output. It may take several minutes as Canto is a little slow to serve up its entire database.
+Create a `docker-compose.override.yml` file and add the CANTO_ prefixed environment variables to it. Then run `docker compose up --build`. This will start the server. Visit http://localhost/dam in your browser to see the output. It may take several minutes as Canto is a little slow to serve up its entire database.
 
 Here is an example `docker-compose.override.yml` file:
 ```yaml

@@ -50,7 +50,7 @@ async function getPage (page = 1) {
 }
 
 const basicAuthSecret = 'Basic ' + Buffer.from(`${process.env.BASIC_AUTH_USER}:${process.env.BASIC_AUTH_SECRET}`).toString('base64')
-server.app.get('/', async (req, res) => {
+server.app.get('/dam', async (req, res) => {
   if (process.env.BASIC_AUTH_USER) {
     if (!req.headers.authorization) {
       res.headers({
