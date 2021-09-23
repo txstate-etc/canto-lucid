@@ -1,10 +1,16 @@
 import { HttpsAgent } from 'agentkeepalive'
 import axios from 'axios'
 import Server from 'fastify-txstate'
+import fastifyRateLimit from 'fastify-rate-limit'
 import { Cache } from 'txstate-utils'
 import { LucidData, LucidImage } from './lucid.js'
 
 const server = new Server()
+server.app.register(fastifyRateLimit, {
+  max: 10,
+  timeWindow: '1 minute'
+})
+
 const tokenCache = new Cache(async () => {
   try {
     const resp = await axios.post(
