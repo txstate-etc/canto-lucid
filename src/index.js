@@ -1,9 +1,8 @@
-import { HttpsAgent } from 'agentkeepalive'
-import axios from 'axios'
 import Server from 'fastify-txstate'
 import fastifyRateLimit from 'fastify-rate-limit'
-import { Cache } from 'txstate-utils'
+import { sleep } from 'txstate-utils'
 import { LucidData, LucidImage } from './lucid.js'
+import { getPage, cantoChanged } from './canto.js'
 
 const server = new Server()
 server.app.register(fastifyRateLimit, {
@@ -11,48 +10,39 @@ server.app.register(fastifyRateLimit, {
   timeWindow: '1 minute'
 })
 
-const tokenCache = new Cache(async () => {
-  try {
-    const resp = await axios.post(
-      'https://oauth.canto.com/oauth/api/oauth2/token?' + new URLSearchParams(
-      {
-        app_id: process.env.CANTO_APP_ID,
-        app_secret: process.env.CANTO_APP_SECRET,
-        grant_type: 'client_credentials',
-        scope: 'admin'
-      }).toString()
-    )
-    return resp.data.accessToken
-  } catch (e) {
-    console.error(e.response.status, e.request)
-    throw new Error('Unable to acquire auth token.')
+async function getData() {
+  console.info('Retrieving info from Canto.')
+  const lucid = new LucidData()
+  let lastPage = 25
+  for (let page = 1; page <= 25 && page <= lastPage; page++) {
+    let images;
+    ({ images, lastPage } = await getPage(page))
+    for (const image of images) {
+      lucid.addImage(new LucidImage(image))
+    }
   }
-}, {
-  freshseconds: 15 * 24 * 3600
-})
-
-const savedClient = axios.create({
-  baseURL: `https://${process.env.CANTO_DOMAIN}.canto.com/api/v1`,
-  httpsAgent: new HttpsAgent()
-})
-async function client () {
-  savedClient.defaults.headers.authorization = `Bearer ${await tokenCache.get()}`
-  return savedClient
+  console.info('Retrieval of info from Canto successful.')
+  return lucid.json()
 }
 
-async function getPage (page = 1) {
-  const resp = await (await client()).get('/search', {
-    params: {
-      approval: 'approved',
-      scheme: 'image',
-      limit: 10000,
-      start: (page - 1) * 10000
+let datapromise
+let data
+let lastrun
+async function watchCanto() {
+  while (true) {
+    const savelastrun = lastrun
+    try {
+      if (!data || !lastrun || lastrun.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 || await cantoChanged(lastrun)) {
+        lastrun = new Date()
+        datapromise = getData()
+        data = await datapromise
+      }
+    } catch (e) {
+      lastrun = savelastrun
+      console.error(e)
     }
-  })
-  const found = resp.data.found
-  const limit = resp.data.limit
-  const images = resp.data.results.map(r => new LucidImage(r))
-  return { images, lastPage: Math.ceil(found / limit) }
+    await sleep(1000 * 60 * 10)
+  }
 }
 
 const basicAuthSecret = 'Basic ' + Buffer.from(`${process.env.BASIC_AUTH_USER}:${process.env.BASIC_AUTH_SECRET}`).toString('base64')
@@ -68,17 +58,12 @@ server.app.get('/dam', async (req, res) => {
       return
     }
   }
-  const lucid = new LucidData()
-  let lastPage = 25
-  for (let page = 1; page <= 25 && page <= lastPage; page++) {
-    let images;
-    ({ images, lastPage } = await getPage(page))
-    for (const image of images) {
-      lucid.addImage(image)
-    }
-  }
-  return lucid.json()
+  return data ?? await datapromise
 })
 
-server.start(3000)
-  .catch(e => { console.error(e); process.exit(1) })
+async function main () {
+  await server.start(3000)
+  await watchCanto()
+}
+
+main().catch(e => { console.error(e); process.exit(1) })
