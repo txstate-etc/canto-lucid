@@ -24,7 +24,7 @@ export class LucidData {
   json () {
     return {
       version: this.version,
-      folders: Object.values(this.folders).map(f => f.json())
+      data: Object.values(this.folders).map(f => f.json())
     }
   }
 }
