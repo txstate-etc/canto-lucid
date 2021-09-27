@@ -35,7 +35,7 @@ async function watchCanto() {
       if (!data || !lastrun || lastrun.getTime() < new Date().getTime() - 1000 * 60 * 60 * 24 || await cantoChanged(lastrun)) {
         lastrun = new Date()
         datapromise = getData()
-        data = await datapromise
+        data = JSON.stringify(await datapromise)
       }
     } catch (e) {
       lastrun = savelastrun
@@ -58,6 +58,7 @@ server.app.get('/dam', async (req, res) => {
       return
     }
   }
+  res.header('content-type', 'application/json')
   return data ?? await datapromise
 })
 

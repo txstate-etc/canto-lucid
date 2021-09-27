@@ -39,7 +39,7 @@ export async function cantoChanged (lastrun) {
       limit: 1
     }
   })
-  console.info(`Found ${resp.data.results?.length ?? 0} changes since ${lastrun.toUTFString()}.`)
+  console.info(`Found ${resp.data.results?.length ?? 0} changes since ${lastrun.toUTCString()}.`)
   return resp.data.results?.length > 0
 }
 
