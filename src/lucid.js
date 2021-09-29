@@ -51,26 +51,8 @@ export class LucidImage {
   constructor (img) {
     this.id = img.id
     this.name = img.name
-    this.url = img.url.download
-
-    if (process.env.SCALE_IMAGES) {
-      const width = img.width
-      const height = img.height
-      const filesize = img.size
-      if (filesize > LUCID_MAXMB * 1024 * 1024 || width > LUCID_MAXRES || height > LUCID_MAXRES) {
-        let neww, newh
-        if (height > width) {
-          newh = Math.min(LUCID_MAXRES, height)
-          neww = Math.round(newh * width / height)
-        } else {
-          neww = Math.min(LUCID_MAXRES, width)
-          newh = Math.round(neww * height / width)
-        }
-        this.url = `https://${process.env.CANTO_DOMAIN}.canto.com/api_binary/v1/advance/image/${this.id}/download?resize=${neww}x${newh}&type=jpg`
-      }
-    }
-
-    this.thumbnailUrl = img.url.preview
+    this.url = img.url.directUrlOriginal
+    this.thumbnailUrl = img.url.directUrlPreview
 
     const folderPaths = sortby(
       img.relatedAlbums?.map(album => {

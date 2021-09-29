@@ -12,17 +12,16 @@ Configure it with environment variables:
 
 As a best practice, the node instance runs as non-root and so the server runs on port 3000. You can have docker map that back to 80 or 443 as needed (see below for info about SSL support).
 
+## Caveat
+Canto allows images to be placed into multiple places in the folder hierarchy. Lucid does not. In order to resolve this discrepancy, this tool places the image in the folder with the shortest overall path. Therefore, some folders may be missing images that exist in Canto. The image will be tagged with the album names that it is "removed" from, so that searches matching the album name will still turn up the image. This was the best compromise I could think of.
+
+The other alternative was generating a new ID for each appearance of the image based on a combination of image id and album id, but that would have made Lucid searches turn up duplicate images all over the place. Untenable.
+
 ## SSL
-SSL support is enabled automatically if you mount a key and cert into the docker container at `/securekeys/private.key` and `/securekeys/cert.pem`, respectively. If you provide certs, port 3000 will expect https connections only.
+SSL support is enabled automatically if you mount a key and cert into the docker container at `/securekeys/private.key` and `/securekeys/cert.pem`, respectively. If you provide the cert, port 3000 will expect https connections only.
 
 See the docker docs for more information about mounting volumes. Make sure the node user
 (UID: 1000, GID: 1000) is permitted to read both files.
-
-## Image Scaling
-Canto's image scaling offerings are limited in that you cannot set the desired JPG quality. Lucid has its own scaling mechanisms that will kick in for images larger than 4000x4000 pixels (according to their integration specialist), and should be sufficient. However, if you would like to control the scaling and have Canto process your images, you can enable this with environment variables:
-* `SCALE_IMAGES` Enable the scaling. Required to be truthy if you want this feature.
-* `LUCID_MAXMB` Trigger the processing for images larger than this, in MB. Default 8.
-* `LUCID_MAXRES` Trigger the processing for images with either width or height greater than this many pixels. Default 4000.
 
 ## To run a developer instance
 Create a `docker-compose.override.yml` file and add the CANTO_ prefixed environment variables to it. Then run `docker compose up --build`. This will start the server. Visit http://localhost/dam in your browser to see the output. It may take several minutes as Canto is a little slow to serve up its entire database.
