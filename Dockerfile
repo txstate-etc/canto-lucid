@@ -7,5 +7,4 @@ RUN npm install --production
 COPY src src
 
 USER node
-ENTRYPOINT [ "npm" ]
-CMD [ "start" ]
+CMD [ "node", "src/index.js" ]
