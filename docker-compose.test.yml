@@ -1,0 +1,19 @@
+version: "3.5"
+services:
+  cantobridge:
+    build:
+      context: .
+    environment:
+      CANTO_DOMAIN: YourCantoName
+      CANTO_APP_ID: set in docker-compose.override.yml
+      CANTO_APP_SECRET: set in docker-compose.override.yml
+      BASIC_AUTH_USER: admin
+      BASIC_AUTH_SECRET: secret
+  testing-container:
+    depends_on:
+      - cantobridge
+    build:
+      context: .
+      dockerfile: test/Dockerfile
+    volumes:
+      - ./test/test-results:/test-results
